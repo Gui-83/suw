@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrat de Sous-Location</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+        .form-group {
+            margin-bottom: 1em;
+        }
+        .title {
+            text-align: center;
+            color: #55558B;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .gras {
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+        .subtitle {
+            color: gray;
+            font-style: italic;
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .article {
+            color: #00008B;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        .paraphes {
+            text-align: right;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+        }
+        input, textarea {
+            padding: 0.5em;
+            box-sizing: border-box;
+        }
+        .inline-input {
+            display: inline-block;
+            width: auto;
+            min-width: 200px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.5em 1em;
+            border: none;
+            cursor: pointer;
+        }
+        .signature-pad-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+        }
+    </style>
+    <!-- Inclure jsPDF, html2canvas et Signature Pad -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        let signaturePad, signaturePad2;
+
+        function initSignaturePads() {
+            const canvas1 = document.getElementById('signature-pad');
+            const canvas2 = document.getElementById('signature-pad2');
+
+            function resizeCanvas(canvas) {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext('2d').scale(ratio, ratio);
+            }
+
+            window.addEventListener('resize', () => {
+                resizeCanvas(canvas1);
+                resizeCanvas(canvas2);
+            });
+
+            resizeCanvas(canvas1);
+            resizeCanvas(canvas2);
+
+            signaturePad = new SignaturePad(canvas1);
+            signaturePad2 = new SignaturePad(canvas2);
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const elementHTML = document.querySelector(".container");
+            html2canvas(elementHTML).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // La largeur en mm pour un format A4
+                const pageHeight = 295; // La hauteur en mm pour un format A4
+                const imgHeight = (canvas.height-132) * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                let i=0;
+				while (heightLeft >= 0 && i==0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+					i++;
+                }
+
+                doc.save("contrat_de_sous_location.pdf");
+            });
+        }
+
+        window.onload = initSignaturePads;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Contrat de Sous-Location d'un local d'habitation</h1>
+        <div class="subtitle">(Loi n°48-1360 du 1er septembre 1948 et loi n°89-462 du 6 juillet 1989)</div>
+        <br>
+        <div class="gras">ENTRE LES SOUSSIGNÉS</div>
+        <br>
+        <form onsubmit="generatePDF(); return false;">
+            <div class="form-group">
+                <label for="locataire">Nom et prénom du locataire principal :</label>
+                <input type="text" id="locataire" name="locataire" class="inline-input">
+            </div>
+            <div class="form-group">
+                <label for="adresse_loc">Adresse :</label>
+                <input type="text" id="adresse_loc" name="adresse_loc" class="inline-input">
+            </div>
+            <div class="form-group">
+                <label for="num_loc">Numéro de téléphone :</label>
+                <input type="text" id="num_loc" name="num_loc" class="inline-input">
+            </div>
+            <br>
+            <div class="gras">Désigné(e)(s) ci-après « le locataire principal » <br><br> d’une part <br><br>ET</div>
+            <br>
+            <div class="form-group">
+                <label for="souslocataire">Nom du sous-locataire :</label>
+                <input type="text" id="souslocataire" name="souslocataire" class="inline-input">
+            </div>
+            <div class="form-group">
+                <label for="adresse_sl">Adresse :</label>
+                <input type="text" id="adresse_sl" name="adresse_sl" class="inline-input">
+            </div>
+            <div class="form-group">
+                <label for="num_sl">Numéro de téléphone :</label>
+                <input type="text" id="num_sl" name="num_sl" class="inline-input">
+            </div>
+            <br>
+            <div class="gras">Désigné(e)(s) ci-après « le sous-locataire » <br><br> D'AUTRE PART <br><br><br> IL EST RAPPELÉ CE QUI SUIT :</div>
+            <br>
+            <div class="form-group">
+                <span>Le Bailleur</span>
+                <input id="bailleur" name="bailleur" class="inline-input">
+                <span>(indiquer le nom du bailleur) , domicilié</span>
+                <input id="domicile" name="domicile" class="inline-input">
+                <span>(indiquer le domicile du bailleur) a donné en location à</span>
+                <input id="nl" name="nl" class="inline-input">
+                <span> (indiquer nom du locataire principal) le logement situé</span>
+                <input id="adressecompl" name="adressecompl" class="inline-input">
+                <span> (adresse complète à usage de résidence principale), par un bail signé le</span>
+                <input id="datebl" name="datebl" class="inline-input">
+                <span> (date de signature du bail)</span>
+            </div>
+            <br>
+            <div class="gras">ET IL A ÉTÉ CONVENU CE QUI SUIT :</div>
+            <br>
+            <div class="article">ARTICLE 1 – SOUS-LOCATION</div>
+            <br>
+            <div>Conformément aux dispositions des articles 8 et 9 de la loi du 6 juillet 1989 et de la loi du 1er septembre 1948, le sous-locataire est autorisé à occuper le logement pour une durée de </div>
+            <input id="nbm" name="nbm" class="inline-input">
+            <span> (indiquer le nombre de mois) mois à compter du</span>
+            <input id="dateeffet" name="dateeffet" class="inline-input">
+            <span> (date de prise d'effet de la sous-location).</span>
+            <br>
+            <div>En contrepartie, le sous-locataire versera au locataire principal un loyer mensuel de </div>
+            <input id="montant" name="montant" class="inline-input">
+            <span> (indiquer le montant en euros) euros par mois.</span>
+            <br><br>
+			<br>
+			<br><br><br>
+            <div class="article">ARTICLE 2 - OBLIGATIONS DU LOCATAIRE PRINCIPAL</div>
+            <div>Le locataire principal s'engage à :</div>
+            <br>
+            <div class="gras"> 1. Remettre au sous-locataire une copie du contrat de bail principal.</div>
+            <div class="gras"> 2. Informer le sous-locataire de toute modification du contrat de bail principal.</div>
+            <div class="gras"> 3. Assurer que le logement est en bon état d'usage et de réparation.</div>
+            <br><br>
+            <div class="article">ARTICLE 3 - OBLIGATIONS DU SOUS-LOCATAIRE</div>
+            <div>Le sous-locataire s'engage à :</div>
+            <br>
+            <div class="gras"> 1. Occuper les lieux personnellement et paisiblement.</div>
+            <div class="gras"> 2. Payer le loyer et les charges dans les termes convenus.</div>
+            <div class="gras"> 3. Respecter le règlement intérieur de l'immeuble.</div>
+            <br><br>
+            <div class="article">ARTICLE 4 - ÉTAT DES LIEUX</div>
+            <br>
+            <div>Un état des lieux sera établi contradictoirement lors de l'entrée en jouissance du sous-locataire et lors de sa sortie. Cet état des lieux sera annexé au présent contrat.</div>
+            <br><br>
+            <div class="article">ARTICLE 5 - DÉPÔT DE GARANTIE</div>
+            <br>
+            <div>Le sous-locataire verse ce jour au locataire principal une somme de </div>
+            <input id="depot" name="depot" class="inline-input">
+            <span> euros à titre de dépôt de garantie, destinée à couvrir d'éventuelles dégradations du logement.</span>
+            <br><br>
+            <div class="article">ARTICLE 6 - ASSURANCES</div>
+            <br>
+            <div>Le sous-locataire s'engage à souscrire une assurance multirisques habitation et à en justifier auprès du locataire principal lors de l'entrée dans les lieux.</div>
+            <br><br>
+            <div class="article">ARTICLE 7 - RÉSILIATION</div>
+            <br>
+            <div>Le présent contrat pourra être résilié par l'une ou l'autre des parties sous réserve de respecter un préavis d'un mois.</div>
+            <br><br>
+            <div class="article">ARTICLE 8 - INVENTAIRE DES MEUBLES</div>
+            <br>
+            <div>Un inventaire des meubles mis à disposition du sous-locataire sera établi contradictoirement lors de l'entrée en jouissance du sous-locataire et annexé au présent contrat.</div>
+            <br><br>
+            <div>Fait à :</div>
+            <input id="faita" name="faita" class="inline-input">
+            <div>Le :</div>
+            <input id="datefait" name="datefait" class="inline-input">
+            <br>
+            <div class="form-group">
+                <label for="signature">Signature du locataire principal :</label>
+                <div class="signature-pad-container">
+                    <canvas id="signature-pad"></canvas>
+                </div>
+                <button type="button" onclick="signaturePad.clear()">Effacer</button>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="signature2">Signature du sous-locataire :</label>
+                <div class="signature-pad-container">
+                    <canvas id="signature-pad2"></canvas>
+                </div>
+                <button type="button" onclick="signaturePad2.clear()">Effacer</button>
+            </div>
+            <br>
+            <button type="submit" class="button">Générer le PDF</button>
+        </form>
+    </div>
+</body>
+</html>
